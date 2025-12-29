@@ -6,11 +6,11 @@ class ApiService {
   // GANTI DENGAN API KEY KAMU
   static String apiKey = dotenv.env['TMDB_API_KEY'] ?? '';
   
-  static String baseUrl = dotenv.env['BASE_URL'] ?? '';
+  static String baseUrl = dotenv.env['BASE_URL'] ?? 'https://api.themoviedb.org/3';
   
-  static String imageBaseUrl = dotenv.env['IMAGE_BASE_URL'] ?? '';
+  static String imageBaseUrl = dotenv.env['IMAGE_BASE_URL'] ?? 'https://image.tmdb.org/t/p/w500';
   
-  static String imageThumbnailUrl = dotenv.env['IMAGE_THUMBNAIL_URL'] ?? '';
+  static String imageThumbnailUrl = dotenv.env['IMAGE_THUMBNAIL_URL'] ?? 'https://image.tmdb.org/t/p/w200';
 
   static Future<List<String>> getPopularMovieImages() async {
     final response = await http.get(Uri.parse('$baseUrl/movie/popular?api_key=$apiKey'));

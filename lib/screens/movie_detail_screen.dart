@@ -1,4 +1,4 @@
-import 'dart:convert'; // Untuk mengelola data JSON
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,6 +6,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../api_service.dart';
 import 'other_user_profile_screen.dart';
+import 'account_screen.dart'; 
 
 class MovieDetailScreen extends StatefulWidget {
   final int movieId;
@@ -55,7 +56,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
       _currentUsername = prefs.getString('user_username') ?? 'User';
       _currentProfilePath = prefs.getString('profile_image_path');
     });
-
     _loadLocalReviews(prefs);
   }
 
@@ -63,7 +63,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     String? jsonString = prefs.getString('all_user_reviews');
     if (jsonString != null) {
       List<dynamic> savedReviews = json.decode(jsonString);
-      
       for (var review in savedReviews) {
         if (review['movieId'] == widget.movieId) {
           setState(() {
@@ -72,7 +71,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               'avatar': review['userImage'],
               'content': review['content'],
               'rating': review['rating'],
-              'isLocal': true
+              'isLocal': true 
             });
           });
         }
@@ -80,7 +79,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     }
   }
 
-  // 2. Cek Status Favorit
   void _checkIfFavorite() async {
     final prefs = await SharedPreferences.getInstance();
     List<String> favs = prefs.getStringList('user_favorites') ?? [];
@@ -90,30 +88,39 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     });
   }
 
-  // 3. Fungsi Tombol Save / Favorite
   void _toggleFavorite(String posterUrl) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> favs = prefs.getStringList('user_favorites') ?? [];
-    String dataString = '${widget.movieId}|$posterUrl'; // Format simpan: "ID|URL_POSTER"
+    String dataString = '${widget.movieId}|$posterUrl';
 
     setState(() {
       if (_isFavorite) {
-        // Hapus dari favorit (Cari yang ID-nya sama)
         favs.removeWhere((item) => item.startsWith('${widget.movieId}|'));
         _isFavorite = false;
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Dihapus dari Favorit')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Dihapus dari Favorit'), 
+            backgroundColor: Colors.red, // Merah untuk hapus (opsional, biar beda)
+            duration: Duration(seconds: 1),
+          )
+        );
       } else {
-        // Tambah ke favorit
         favs.insert(0, dataString);
         _isFavorite = true;
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Disimpan ke Favorit')));
+        // --- WARNA HIJAU SUCCESS (SEPERTI LOGIN) ---
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Disimpan ke Favorit'), 
+            backgroundColor: Colors.green, // <-- GANTI JADI HIJAU STANDAR
+            duration: Duration(seconds: 1),
+          )
+        );
       }
     });
     
     await prefs.setStringList('user_favorites', favs);
   }
 
-  // 4. Fungsi Submit Review
   void _submitReview(String content, double rating, String movieTitle, String posterUrl) async {
     if (content.isEmpty) return;
 
@@ -145,17 +152,23 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     allReviews.insert(0, newReviewData);
     await prefs.setString('all_user_reviews', json.encode(allReviews));
 
-    // C. Tambahkan ke "RECENT"
     List<String> recents = prefs.getStringList('user_recents') ?? [];
     recents.remove(posterUrl); 
     recents.insert(0, posterUrl);
-    // Batasi max 10 recent
     if (recents.length > 10) recents.removeLast();
     await prefs.setStringList('user_recents', recents);
 
     if (!mounted) return;
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ulasan berhasil dikirim!')));
+    Navigator.pop(context); 
+    
+    // --- WARNA HIJAU SUCCESS (SEPERTI LOGIN) ---
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Ulasan berhasil dikirim!'), 
+        backgroundColor: Colors.green, // <-- GANTI JADI HIJAU STANDAR
+        duration: Duration(seconds: 1),
+      )
+    );
   }
 
   void _showRatingDialog(String movieTitle, String posterUrl) {
@@ -174,7 +187,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Info User
                   Row(
                     children: [
                       CircleAvatar(
@@ -189,8 +201,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Bintang Rating
                   RatingBar.builder(
                     initialRating: tempRating,
                     minRating: 1,
@@ -204,8 +214,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     },
                   ),
                   const SizedBox(height: 20),
-              
-                  // Input Text
                   Container(
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
                     child: TextField(
@@ -219,8 +227,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-              
-                  // Tombol Posting
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -267,11 +273,9 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
           final credits = movie['credits']['cast'] as List;
           final videos = movie['videos']['results'] as List;
           
-          // Data Penting untuk disimpan
           final String posterUrl = '${ApiService.imageBaseUrl}${movie['poster_path']}';
           final String movieTitle = movie['title'];
 
-          // Cari Trailer
           String? videoKey;
           if (videos.isNotEmpty) {
             final trailer = videos.firstWhere(
@@ -293,7 +297,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- 1. HEADER
                   Stack(
                     children: [
                       if (_youtubeController != null)
@@ -309,8 +312,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           height: 250,
                           fit: BoxFit.cover,
                         ),
-                      
-                      // Tombol Back
                       Positioned(
                         top: 10, left: 10,
                         child: CircleAvatar(
@@ -321,8 +322,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           ),
                         ),
                       ),
-
-                      // TOMBOL SAVE (FAVORITE)
                       Positioned(
                         top: 10, right: 10,
                         child: CircleAvatar(
@@ -339,7 +338,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ],
                   ),
 
-                  // --- 2. JUDUL & INFO ---
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -354,7 +352,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 10),
-
                         Row(
                           children: [
                             Text(
@@ -370,7 +367,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                             ),
                           ],
                         ),
-                        
                         const SizedBox(height: 15),
                         const Text('Synopsis', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1B4332))),
                         Text(movie['overview'] ?? 'No synopsis available.', style: const TextStyle(color: Color(0xFF1B4332))),
@@ -378,7 +374,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ),
                   ),
 
-                  // --- 3. TOMBOL RATE & REVIEW ---
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Row(
@@ -392,7 +387,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
                   const SizedBox(height: 20),
 
-                  // --- 4. LIST REVIEW ---
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     padding: const EdgeInsets.all(16),
@@ -417,10 +411,17 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16.0),
                             child: GestureDetector(
+                              behavior: HitTestBehavior.opaque, 
                               onTap: () {
-                                if (review['isLocal'] == false) {
+                                if (review['isLocal'] == true) {
+                                  // --- MODE EDIT MATI (isEditable: false) ---
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AccountScreen(isEditable: false)));
+                                } else {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => 
-                                    OtherUserProfileScreen(username: review['name'], avatarUrl: review['avatar'])
+                                    OtherUserProfileScreen(
+                                      username: review['name'] ?? 'User', 
+                                      avatarUrl: review['avatar'] ?? 'https://i.pravatar.cc/150?img=3'
+                                    )
                                   ));
                                 }
                               },
@@ -437,7 +438,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(review['name'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                        Text(review['name'] ?? 'Anonymous', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                                         RatingBarIndicator(
                                           rating: (review['rating'] as num).toDouble(),
                                           itemBuilder: (context, index) => const Icon(Icons.star, color: Colors.amber),
@@ -445,7 +446,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                           itemSize: 12.0,
                                         ),
                                         Text(
-                                          review['content'],
+                                          review['content'] ?? '',
                                           style: const TextStyle(color: Colors.white70, fontSize: 12),
                                         ),
                                       ],
@@ -461,6 +462,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   ),
                   
                   const SizedBox(height: 20),
+
+                  // --- CAST SECTION (KEMBALI KE CIRCLE AVATAR) ---
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Container(
@@ -484,11 +487,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 30,
+                                backgroundColor: Colors.grey,
                                 backgroundImage: cast['profile_path'] != null 
                                   ? NetworkImage('${ApiService.imageThumbnailUrl}${cast['profile_path']}')
                                   : null,
-                                backgroundColor: Colors.grey,
-                                child: cast['profile_path'] == null ? const Icon(Icons.person) : null,
+                                child: cast['profile_path'] == null 
+                                  ? const Icon(Icons.person, color: Colors.white) 
+                                  : null,
                               ),
                               const SizedBox(height: 5),
                               SizedBox(

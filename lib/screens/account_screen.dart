@@ -6,7 +6,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'welcome_screen.dart';
 
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key});
+  // Parameter baru: Apakah halaman ini boleh diedit?
+  // Default 'true' agar di Menu Utama tombolnya tetap ada.
+  final bool isEditable; 
+
+  const AccountScreen({super.key, this.isEditable = true});
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -31,7 +35,7 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadUserData(); 
+    _loadUserData();
   }
 
   void _loadUserData() async {
@@ -47,23 +51,21 @@ class _AccountScreenState extends State<AccountScreen> {
 
       String? reviewsJson = prefs.getString('all_user_reviews');
       if (reviewsJson != null) {
-
         List<dynamic> decoded = json.decode(reviewsJson);
-
         myReviews = List<Map<String, dynamic>>.from(decoded);
       }
 
       recentMovies = prefs.getStringList('user_recents') ?? [];
 
       List<String> rawFavs = prefs.getStringList('user_favorites') ?? [];
-      favoriteMovies = rawFavs.map((item) {
-        return item.split('|')[1];
-      }).toList();
-
+      favoriteMovies = rawFavs.map((item) => item.split('|')[1]).toList();
     });
   }
 
   Future<void> _pickImage() async {
+    // Kunci keamanan: Tidak bisa ganti foto jika mode edit mati
+    if (!widget.isEditable) return;
+
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       final prefs = await SharedPreferences.getInstance();
@@ -156,168 +158,197 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.grey[300],
-                      backgroundImage: _profileImage != null 
-                          ? FileImage(_profileImage!) as ImageProvider
-                          : const NetworkImage('https://i.pravatar.cc/150?img=3'), 
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: _pickImage, 
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1B4332),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text('edit', style: TextStyle(color: Colors.white, fontSize: 10)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(_username, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    Text(_email, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                    const SizedBox(height: 5),
-                     Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1B4332),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text('follow', style: TextStyle(color: Colors.white, fontSize: 10)),
-                      ),
-                  ],
-                )
-              ],
-            ),
-            const SizedBox(height: 25),
+    bool isPushed = Navigator.canPop(context);
 
-            _buildSectionTitle('Review'),
-            const SizedBox(height: 10),
-            if (myReviews.isEmpty)
-              _buildEmptyState('Belum ada review yang ditulis.')
-            else
-              ListView.builder(
-                shrinkWrap: true, 
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: myReviews.length,
-                itemBuilder: (context, index) {
-                  final review = myReviews[index];
-                  return Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF74A587),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: isPushed 
+        ? AppBar(
+            backgroundColor: const Color(0xFF1B4332),
+            elevation: 0,
+            title: const Text('My Account', style: TextStyle(fontWeight: FontWeight.bold)),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          )
+        : null, 
+      
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // --- PROFILE HEADER ---
+                Row(
+                  children: [
+                    Stack(
                       children: [
-                        Row(
-                          children: [
-                             CircleAvatar(
-                                radius: 12,
-                                backgroundImage: _profileImage != null 
-                                  ? FileImage(_profileImage!) as ImageProvider
-                                  : const NetworkImage('https://i.pravatar.cc/150?img=3'),
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundColor: Colors.grey[300],
+                          backgroundImage: _profileImage != null 
+                              ? FileImage(_profileImage!) as ImageProvider
+                              : const NetworkImage('https://i.pravatar.cc/150?img=3'), 
+                        ),
+                        
+                        // HANYA TAMPILKAN TOMBOL EDIT JIKA MODE EDIT AKTIF
+                        if (widget.isEditable)
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: _pickImage, 
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1B4332),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Text('edit', style: TextStyle(color: Colors.white, fontSize: 10)),
                               ),
-                            const SizedBox(width: 8),
-                            Text(_username, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        Text('Movie: ${review['movieTitle']}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF1B4332))),
-                        const SizedBox(height: 3),
-                        Text(
-                          review['content'] ?? '',
-                          style: const TextStyle(fontSize: 12),
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                            ),
+                          ),
                       ],
                     ),
-                  );
-                },
-              ),
-
-            const SizedBox(height: 20),
-
-             _buildSectionTitle('Recent'),
-             const SizedBox(height: 10),
-             if (recentMovies.isEmpty)
-              _buildEmptyState('Belum ada film yang dilihat/direview.')
-             else
-               _buildHorizontalMovieList(recentMovies),
-
-             const SizedBox(height: 20),
-
-             _buildSectionTitle('Favorite'),
-             const SizedBox(height: 10),
-             if (favoriteMovies.isEmpty)
-                _buildEmptyState('Belum ada film favorit.')
-             else
-               _buildHorizontalMovieList(favoriteMovies),
-
-            const SizedBox(height: 40),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1B4332),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                  ),
-                  onPressed: () {
-                    _showConfirmationDialog(
-                      title: 'Apakah kamu yakin ingin menghapus akun?',
-                      content: '',
-                      onYes: _handleDeleteAccount,
-                    );
-                  },
-                  child: const Text('Delete Account', style: TextStyle(color: Colors.white)),
+                    const SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(_username, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        Text(_email, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        const SizedBox(height: 5),
+                         Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1B4332),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text('follow', style: TextStyle(color: Colors.white, fontSize: 10)),
+                          ),
+                      ],
+                    )
+                  ],
                 ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1B4332),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                const SizedBox(height: 25),
+
+                // --- REVIEW SECTION ---
+                _buildSectionTitle('Review'),
+                const SizedBox(height: 10),
+                if (myReviews.isEmpty)
+                  _buildEmptyState('Belum ada review yang ditulis.')
+                else
+                  ListView.builder(
+                    shrinkWrap: true, 
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: myReviews.length,
+                    itemBuilder: (context, index) {
+                      final review = myReviews[index];
+                      return Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF74A587),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                 CircleAvatar(
+                                    radius: 12,
+                                    backgroundImage: _profileImage != null 
+                                      ? FileImage(_profileImage!) as ImageProvider
+                                      : const NetworkImage('https://i.pravatar.cc/150?img=3'),
+                                  ),
+                                const SizedBox(width: 8),
+                                Text(_username, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Text('Movie: ${review['movieTitle']}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF1B4332))),
+                            const SizedBox(height: 3),
+                            Text(
+                              review['content'] ?? '',
+                              style: const TextStyle(fontSize: 12),
+                              maxLines: 4,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                  onPressed: () {
-                     _showConfirmationDialog(
-                      title: 'Apakah kamu yakin ingin keluar?',
-                      content: '',
-                      onYes: _handleLogout,
-                    );
-                  },
-                  child: const Text('Left', style: TextStyle(color: Colors.white)),
-                ),
+
+                const SizedBox(height: 20),
+
+                // --- RECENT SECTION ---
+                 _buildSectionTitle('Recent'),
+                 const SizedBox(height: 10),
+                 if (recentMovies.isEmpty)
+                  _buildEmptyState('Belum ada film yang dilihat/direview.')
+                 else
+                   _buildHorizontalMovieList(recentMovies),
+
+                 const SizedBox(height: 20),
+
+                 // --- FAVORITE SECTION ---
+                 _buildSectionTitle('Favorite'),
+                 const SizedBox(height: 10),
+                 if (favoriteMovies.isEmpty)
+                    _buildEmptyState('Belum ada film favorit.')
+                 else
+                   _buildHorizontalMovieList(favoriteMovies),
+
+                const SizedBox(height: 40),
+
+                // --- FOOTER BUTTONS (DELETE & LOGOUT) ---
+                // HANYA TAMPIL JIKA MODE EDIT AKTIF
+                if (widget.isEditable)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1B4332),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                        ),
+                        onPressed: () {
+                          _showConfirmationDialog(
+                            title: 'Apakah kamu yakin ingin menghapus akun?',
+                            content: '',
+                            onYes: _handleDeleteAccount,
+                          );
+                        },
+                        child: const Text('Delete Account', style: TextStyle(color: Colors.white)),
+                      ),
+                      const SizedBox(width: 20),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1B4332),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                        ),
+                        onPressed: () {
+                           _showConfirmationDialog(
+                            title: 'Apakah kamu yakin ingin keluar?',
+                            content: '',
+                            onYes: _handleLogout,
+                          );
+                        },
+                        child: const Text('Left', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 20),
               ],
             ),
-            const SizedBox(height: 20),
-          ],
+          ),
         ),
       ),
     );

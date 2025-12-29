@@ -15,7 +15,7 @@ class OtherUserProfileScreen extends StatefulWidget {
 }
 
 class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
-  bool isFollowing = false; // Status follow
+  bool isFollowing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +26,12 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
         elevation: 0,
         title: const Text('FLICK', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
+        // PERBAIKAN TOMBOL BACK
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.of(context).pop(); // Fungsi back yang aman
+          },
         ),
       ),
       body: SingleChildScrollView(
@@ -43,6 +46,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                   CircleAvatar(
                     radius: 40,
                     backgroundImage: NetworkImage(widget.avatarUrl),
+                    backgroundColor: Colors.grey,
                   ),
                   const SizedBox(width: 16),
                   Column(
@@ -62,6 +66,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                             SnackBar(
                               content: Text(isFollowing ? 'You followed ${widget.username}' : 'Unfollowed ${widget.username}'),
                               duration: const Duration(seconds: 1),
+                              backgroundColor: const Color(0xFF1B4332),
                             )
                           );
                         },
@@ -83,7 +88,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
               ),
               const SizedBox(height: 25),
 
-              // Bagian Review (Dummy agar terlihat penuh)
+              // Bagian Review (Dummy)
               _buildSectionTitle('Recent Reviews'),
               const SizedBox(height: 10),
               Container(
@@ -93,9 +98,9 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                   color: const Color(0xFF74A587),
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: const Text(
-                  'This user has excellent taste in movies! JUMBO is their favorite.',
-                  style: TextStyle(fontSize: 12),
+                child: Text(
+                  'This user has excellent taste in movies! ${widget.username}\'s favorite is JUMBO.',
+                  style: const TextStyle(fontSize: 12),
                 ),
               ),
               
