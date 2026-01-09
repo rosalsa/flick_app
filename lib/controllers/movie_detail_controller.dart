@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,7 +10,7 @@ class MovieDetailController extends GetxController {
   var movie = {}.obs;
   var isFavorite = false.obs;
   var reviews = <Map<String, dynamic>>[].obs; // List kosong awal
-  
+
   // Data User
   String currentUsername = '';
   String? currentProfilePath;
@@ -23,14 +22,14 @@ class MovieDetailController extends GetxController {
       'avatar': 'https://i.pravatar.cc/150?img=11',
       'content': 'There is my new favorite movie!',
       'rating': 5.0,
-      'isLocal': false 
+      'isLocal': false,
     },
     {
       'name': 'Quinn Salman',
       'avatar': 'https://i.pravatar.cc/150?img=5',
       'content': 'Sangat menyentuh hati.',
       'rating': 4.5,
-      'isLocal': false
+      'isLocal': false,
     },
   ];
 
@@ -44,10 +43,9 @@ class MovieDetailController extends GetxController {
 
       // 2. Load Data User & Review Lokal
       await _loadUserData(movieId);
-      
+
       // 3. Cek Favorit
       await _checkIfFavorite(movieId);
-
     } catch (e) {
       Get.snackbar("Error", "Gagal memuat data: $e");
     } finally {
@@ -73,7 +71,7 @@ class MovieDetailController extends GetxController {
             'avatar': review['userImage'],
             'content': review['content'],
             'rating': review['rating'],
-            'isLocal': true 
+            'isLocal': true,
           });
         }
       }
@@ -95,26 +93,44 @@ class MovieDetailController extends GetxController {
     if (isFavorite.value) {
       favs.removeWhere((item) => item.startsWith('$movieId|'));
       isFavorite.value = false;
-      Get.snackbar("Sukses", "Dihapus dari Favorit", backgroundColor: Colors.red, colorText: Colors.white, duration: const Duration(seconds: 1));
+      Get.snackbar(
+        "Sukses",
+        "Dihapus dari Favorit",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 1),
+      );
     } else {
       favs.insert(0, dataString);
       isFavorite.value = true;
-      Get.snackbar("Sukses", "Disimpan ke Favorit", backgroundColor: Colors.green, colorText: Colors.white, duration: const Duration(seconds: 1));
+      Get.snackbar(
+        "Sukses",
+        "Disimpan ke Favorit",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 1),
+      );
     }
     await prefs.setStringList('user_favorites', favs);
   }
 
   // Fungsi Aksi: Submit Review
-  void submitReview(int movieId, String content, double rating, String movieTitle, String posterUrl) async {
+  void submitReview(
+    int movieId,
+    String content,
+    double rating,
+    String movieTitle,
+    String posterUrl,
+  ) async {
     if (content.isEmpty) return;
-    
+
     // Update UI List
     reviews.insert(0, {
       'name': currentUsername,
       'avatar': currentProfilePath,
       'content': content,
       'rating': rating,
-      'isLocal': true
+      'isLocal': true,
     });
 
     // Simpan ke SharedPreferences
@@ -131,7 +147,9 @@ class MovieDetailController extends GetxController {
     };
 
     String? jsonString = prefs.getString('all_user_reviews');
-    List<dynamic> allReviews = jsonString != null ? json.decode(jsonString) : [];
+    List<dynamic> allReviews = jsonString != null
+        ? json.decode(jsonString)
+        : [];
     allReviews.insert(0, newReviewData);
     await prefs.setString('all_user_reviews', json.encode(allReviews));
 
@@ -143,6 +161,12 @@ class MovieDetailController extends GetxController {
     await prefs.setStringList('user_recents', recents);
 
     Get.back(); // Tutup Dialog otomatis via GetX
-    Get.snackbar("Sukses", "Ulasan berhasil dikirim!", backgroundColor: Colors.green, colorText: Colors.white, duration: const Duration(seconds: 1));
+    Get.snackbar(
+      "Sukses",
+      "Ulasan berhasil dikirim!",
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 1),
+    );
   }
 }
