@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart'; 
 
 class ApiService {
-  // GANTI DENGAN API KEY KAMU
   static String apiKey = dotenv.env['TMDB_API_KEY'] ?? '';
   
   static String baseUrl = dotenv.env['BASE_URL'] ?? 'https://api.themoviedb.org/3';
