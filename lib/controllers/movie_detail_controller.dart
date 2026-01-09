@@ -5,17 +5,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flick_app/api_service.dart';
 
 class MovieDetailController extends GetxController {
-  // Variabel Data (Dibuat .obs agar reaktif/otomatis update)
   var isLoading = true.obs;
   var movie = {}.obs;
   var isFavorite = false.obs;
-  var reviews = <Map<String, dynamic>>[].obs; // List kosong awal
+  var reviews = <Map<String, dynamic>>[].obs;
 
-  // Data User
   String currentUsername = '';
   String? currentProfilePath;
 
-  // Data Dummy Awal
   final List<Map<String, dynamic>> _dummyReviews = [
     {
       'name': 'Prince Poetiray',
@@ -33,18 +30,14 @@ class MovieDetailController extends GetxController {
     },
   ];
 
-  // Fungsi dipanggil saat Controller pertama kali jalan (pengganti initState)
   void loadMovieDetail(int movieId) async {
     isLoading.value = true;
     try {
-      // 1. Ambil Data API
       var data = await ApiService.getMovieDetail(movieId);
       movie.value = data;
 
-      // 2. Load Data User & Review Lokal
       await _loadUserData(movieId);
 
-      // 3. Cek Favorit
       await _checkIfFavorite(movieId);
     } catch (e) {
       Get.snackbar("Error", "Gagal memuat data: $e");
@@ -58,7 +51,6 @@ class MovieDetailController extends GetxController {
     currentUsername = prefs.getString('user_username') ?? 'User';
     currentProfilePath = prefs.getString('profile_image_path');
 
-    // Reset reviews dengan dummy, lalu tambah review lokal
     reviews.assignAll(_dummyReviews);
 
     String? jsonString = prefs.getString('all_user_reviews');
@@ -84,7 +76,6 @@ class MovieDetailController extends GetxController {
     isFavorite.value = favs.any((item) => item.startsWith('$movieId|'));
   }
 
-  // Fungsi Aksi: Toggle Favorite
   void toggleFavorite(int movieId, String posterUrl) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> favs = prefs.getStringList('user_favorites') ?? [];
@@ -114,7 +105,6 @@ class MovieDetailController extends GetxController {
     await prefs.setStringList('user_favorites', favs);
   }
 
-  // Fungsi Aksi: Submit Review
   void submitReview(
     int movieId,
     String content,
@@ -124,7 +114,6 @@ class MovieDetailController extends GetxController {
   ) async {
     if (content.isEmpty) return;
 
-    // Update UI List
     reviews.insert(0, {
       'name': currentUsername,
       'avatar': currentProfilePath,
@@ -133,7 +122,6 @@ class MovieDetailController extends GetxController {
       'isLocal': true,
     });
 
-    // Simpan ke SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     Map<String, dynamic> newReviewData = {
       'movieId': movieId,
@@ -153,14 +141,13 @@ class MovieDetailController extends GetxController {
     allReviews.insert(0, newReviewData);
     await prefs.setString('all_user_reviews', json.encode(allReviews));
 
-    // Update Recent
     List<String> recents = prefs.getStringList('user_recents') ?? [];
     recents.remove(posterUrl);
     recents.insert(0, posterUrl);
     if (recents.length > 10) recents.removeLast();
     await prefs.setStringList('user_recents', recents);
 
-    Get.back(); // Tutup Dialog otomatis via GetX
+    Get.back(); 
     Get.snackbar(
       "Sukses",
       "Ulasan berhasil dikirim!",

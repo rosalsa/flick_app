@@ -26,11 +26,10 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
         elevation: 0,
         title: const Text('FLICK', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
-        // PERBAIKAN TOMBOL BACK
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
-            Navigator.of(context).pop(); // Fungsi back yang aman
+            Navigator.of(context).pop(); 
           },
         ),
       ),
@@ -40,7 +39,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Profil
               Row(
                 children: [
                   CircleAvatar(
@@ -55,8 +53,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                       Text(widget.username, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                       Text('${widget.username.toLowerCase()}@gmail.com', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                       const SizedBox(height: 8),
-                      
-                      // TOMBOL FOLLOW
+
                       GestureDetector(
                         onTap: () {
                           setState(() {
@@ -88,7 +85,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
               ),
               const SizedBox(height: 25),
 
-              // Bagian Review (Dummy)
               _buildSectionTitle('Recent Reviews'),
               const SizedBox(height: 10),
               Container(
@@ -107,7 +103,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
               const SizedBox(height: 20),
               _buildSectionTitle('Favorites'),
               const SizedBox(height: 10),
-              // Tampilkan gambar dummy
               SizedBox(
                 height: 150,
                 child: ListView(

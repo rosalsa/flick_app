@@ -37,9 +37,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // AppBar diubah sedikit agar TabBar tidak tertutup shadow
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(110), // Tinggi custom untuk menampung TabBar
+        preferredSize: const Size.fromHeight(110),
         child: AppBar(
           backgroundColor: const Color(0xFF1B4332),
           elevation: 0,
@@ -52,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             unselectedLabelColor: Colors.grey,
             indicatorWeight: 3,
             tabs: const [
-              Tab(text: 'FILM', height: 50), // Beri tinggi agar lega
+              Tab(text: 'FILM', height: 50),
               Tab(text: 'ACCOUNT', height: 50),
             ],
           ),
@@ -61,20 +60,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       body: TabBarView(
         controller: _tabController,
         children: [
-          // --- Tab 1: Film Grid ---
           Column(
             children: [
-              // Container Search Bar (Hanya kosmetik, fungsinya dipindah ke icon)
               Container(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
                     Expanded(
-                      // Jadikan TextField readOnly agar keyboard tidak muncul di sini
                       child: TextField(
                         readOnly: true, 
                         onTap: () {
-                           // Panggil fungsi search saat textfield diklik
                            showSearch(context: context, delegate: MovieSearchDelegate());
                         },
                         decoration: InputDecoration(
@@ -87,10 +82,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                     ),
                     const SizedBox(width: 10),
-                    // Tombol Ikon Search
                     GestureDetector(
                       onTap: () {
-                        // Panggil fungsi search saat ikon diklik
                         showSearch(context: context, delegate: MovieSearchDelegate());
                       },
                       child: Container(
@@ -110,7 +103,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 child: Align(alignment: Alignment.centerLeft, child: Text('Daftar Film', style: TextStyle(fontWeight: FontWeight.bold))),
               ),
               const SizedBox(height: 10),
-              // Grid Film
               Expanded(
                 child: movies.isEmpty
                     ? const Center(child: CircularProgressIndicator())
@@ -127,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           final movie = movies[index];
                           return GestureDetector(
                             onTap: () {
-                              // Navigasi ke Halaman Detail
                               Navigator.push(
                                 context, 
                                 MaterialPageRoute(builder: (context) => MovieDetailScreen(movieId: movie['id']))
@@ -146,9 +137,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ],
           ),
-          
-          // --- Tab 2: Account Screen ---
-          // Gunakan widget yang baru kita buat
           const AccountScreen(), 
         ],
       ),

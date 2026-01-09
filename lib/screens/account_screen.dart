@@ -6,8 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'welcome_screen.dart';
 
 class AccountScreen extends StatefulWidget {
-  // Parameter baru: Apakah halaman ini boleh diedit?
-  // Default 'true' agar di Menu Utama tombolnya tetap ada.
   final bool isEditable; 
 
   const AccountScreen({super.key, this.isEditable = true});
@@ -63,7 +61,6 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _pickImage() async {
-    // Kunci keamanan: Tidak bisa ganti foto jika mode edit mati
     if (!widget.isEditable) return;
 
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -181,7 +178,6 @@ class _AccountScreenState extends State<AccountScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- PROFILE HEADER ---
                 Row(
                   children: [
                     Stack(
@@ -193,8 +189,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               ? FileImage(_profileImage!) as ImageProvider
                               : const NetworkImage('https://i.pravatar.cc/150?img=3'), 
                         ),
-                        
-                        // HANYA TAMPILKAN TOMBOL EDIT JIKA MODE EDIT AKTIF
+
                         if (widget.isEditable)
                           Positioned(
                             bottom: 0,
@@ -234,7 +229,6 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
                 const SizedBox(height: 25),
 
-                // --- REVIEW SECTION ---
                 _buildSectionTitle('Review'),
                 const SizedBox(height: 10),
                 if (myReviews.isEmpty)
@@ -286,7 +280,6 @@ class _AccountScreenState extends State<AccountScreen> {
 
                 const SizedBox(height: 20),
 
-                // --- RECENT SECTION ---
                  _buildSectionTitle('Recent'),
                  const SizedBox(height: 10),
                  if (recentMovies.isEmpty)
@@ -296,7 +289,6 @@ class _AccountScreenState extends State<AccountScreen> {
 
                  const SizedBox(height: 20),
 
-                 // --- FAVORITE SECTION ---
                  _buildSectionTitle('Favorite'),
                  const SizedBox(height: 10),
                  if (favoriteMovies.isEmpty)
@@ -306,8 +298,6 @@ class _AccountScreenState extends State<AccountScreen> {
 
                 const SizedBox(height: 40),
 
-                // --- FOOTER BUTTONS (DELETE & LOGOUT) ---
-                // HANYA TAMPIL JIKA MODE EDIT AKTIF
                 if (widget.isEditable)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

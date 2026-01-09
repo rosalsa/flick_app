@@ -8,7 +8,6 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // cardHeight 0.4 karena kontennya sedikit
     return AuthLayout(
       cardHeight: 0.4, 
       child: Column(
@@ -23,7 +22,7 @@ class WelcomeScreen extends StatelessWidget {
           const Spacer(),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1B4332), // Warna Hijau Tua sesuai desain
+              backgroundColor: const Color(0xFF1B4332),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             ),

@@ -4,7 +4,7 @@ import '../api_service.dart';
 
 class AuthLayout extends StatefulWidget {
   final Widget child;
-  final double cardHeight; // Tinggi area putih
+  final double cardHeight;
 
   const AuthLayout({super.key, required this.child, this.cardHeight = 0.5});
 
@@ -28,7 +28,7 @@ class _AuthLayoutState extends State<AuthLayout> {
         movieImages = images.take(5).toList(); // Ambil 5 gambar teratas
       });
     } catch (e) {
-      // Handle error (bisa pakai gambar placeholder lokal)
+      // Handle error 
     }
   }
 
@@ -37,7 +37,6 @@ class _AuthLayoutState extends State<AuthLayout> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. Background Slider
           if (movieImages.isNotEmpty)
             CarouselSlider(
               options: CarouselOptions(
@@ -60,9 +59,8 @@ class _AuthLayoutState extends State<AuthLayout> {
               }).toList(),
             )
           else
-            Container(color: Colors.grey), // Loading state
+            Container(color: Colors.grey),
 
-          // 2. White Rounded Container (Bottom Sheet)
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(

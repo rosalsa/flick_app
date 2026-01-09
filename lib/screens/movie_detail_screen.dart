@@ -8,7 +8,6 @@ import 'package:flick_app/api_service.dart';
 import 'account_screen.dart';
 import 'other_user_profile_screen.dart';
 
-// Ubah jadi StatelessWidget karena tidak perlu setState lagi!
 class MovieDetailScreen extends StatelessWidget {
   final int movieId;
 
@@ -16,27 +15,22 @@ class MovieDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // INJEKSI CONTROLLER (DI)
-    // Saat halaman dibuka, controller dibuat & langsung load data
     final controller = Get.put(MovieDetailController());
     controller.loadMovieDetail(movieId);
 
     return Scaffold(
       backgroundColor: const Color(0xFF74A587),
-      // Obx adalah widget ajaib GetX yang akan update otomatis kalau data di controller berubah
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator(color: Colors.white));
         }
 
-        // Ambil data dari controller
         final movie = controller.movie;
         final credits = movie['credits']['cast'] as List;
         final videos = movie['videos']['results'] as List;
         final String posterUrl = '${ApiService.imageBaseUrl}${movie['poster_path']}';
         final String movieTitle = movie['title'];
 
-        // Logika Trailer (Bisa dipindah ke controller idealnya, tapi disini gapapa untuk UI)
         String? videoKey;
         if (videos.isNotEmpty) {
            final trailer = videos.firstWhere((v) => v['site'] == 'YouTube' && v['type'] == 'Trailer',
@@ -57,7 +51,6 @@ class MovieDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- HEADER ---
                 Stack(
                   children: [
                     if (ytController != null)
@@ -71,7 +64,7 @@ class MovieDetailScreen extends StatelessWidget {
                         backgroundColor: Colors.black45,
                         child: IconButton(
                           icon: const Icon(Icons.arrow_back, color: Colors.white),
-                          onPressed: () => Get.back(), // Pakai Get.back()
+                          onPressed: () => Get.back(), 
                         ),
                       ),
                     ),
@@ -80,7 +73,6 @@ class MovieDetailScreen extends StatelessWidget {
                       child: CircleAvatar(
                         backgroundColor: Colors.black45,
                         child: IconButton(
-                          // Baca status favorit dari controller secara realtime
                           icon: Icon(
                             controller.isFavorite.value ? Icons.bookmark : Icons.bookmark_border,
                             color: controller.isFavorite.value ? Colors.yellow : Colors.white
@@ -92,7 +84,6 @@ class MovieDetailScreen extends StatelessWidget {
                   ],
                 ),
 
-                // --- INFO FILM ---
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -121,7 +112,6 @@ class MovieDetailScreen extends StatelessWidget {
                   ),
                 ),
 
-                // --- TOMBOL ACTION ---
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
@@ -135,7 +125,6 @@ class MovieDetailScreen extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                // --- LIST REVIEW (Reactive) ---
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   padding: const EdgeInsets.all(16),
@@ -144,7 +133,6 @@ class MovieDetailScreen extends StatelessWidget {
                     children: [
                       if (controller.reviews.isEmpty) const Text("Belum ada review.", style: TextStyle(color: Colors.white70)),
                       
-                      // Loop data dari controller.reviews
                       ...controller.reviews.map((review) {
                          ImageProvider avatarImg;
                           if (review['isLocal'] == true && review['avatar'] != null) {
@@ -189,7 +177,6 @@ class MovieDetailScreen extends StatelessWidget {
                   ),
                 ),
                 
-                // --- CAST SECTION (Tetap sama) ---
                 const SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -236,7 +223,6 @@ class MovieDetailScreen extends StatelessWidget {
     );
   }
 
-  // Dialog juga di-update untuk panggil fungsi controller
   void _showRatingDialog(BuildContext context, MovieDetailController controller, String movieTitle, String posterUrl) {
     double tempRating = 3.0;
     TextEditingController reviewController = TextEditingController();
@@ -277,7 +263,6 @@ class MovieDetailScreen extends StatelessWidget {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF74A587)),
                       onPressed: () {
-                        // PANGGIL FUNGSI CONTROLLER
                         controller.submitReview(movieId, reviewController.text, tempRating, movieTitle, posterUrl);
                       },
                       child: const Text('Posting', style: TextStyle(color: Colors.white)),

@@ -28,20 +28,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final prefs = await SharedPreferences.getInstance();
     
-    // --- PERBAIKAN LOGIKA DISINI ---
-    // Kita cek apakah data usernamenya ADA di memori
     String? storedUsername = prefs.getString('user_username');
     String? storedPassword = prefs.getString('user_password');
 
-    // Jika storedUsername NULL, berarti memang belum pernah daftar / akun dihapus
     if (storedUsername == null) {
        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Akun tidak ditemukan. Silakan Register dulu.'), backgroundColor: Colors.orange),
       );
     } 
-    // Jika ada, cek kecocokan password
+
     else if (inputUsername == storedUsername && inputPassword == storedPassword) {
-      // SET STATUS LOGIN JADI TRUE
       await prefs.setBool('is_logged_in', true);
 
        ScaffoldMessenger.of(context).showSnackBar(
@@ -115,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),
-                  onPressed: _handleLogin, // Panggil logika login
+                  onPressed: _handleLogin,
                   child: const Text('Go', style: TextStyle(color: Colors.white)),
                 ),
               ),

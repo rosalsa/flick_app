@@ -12,18 +12,15 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  // Controller untuk mengambil teks input
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Fungsi Register
   void _handleRegister() async {
     String email = _emailController.text.trim();
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
-    // 1. Cek apakah ada yang kosong
     if (email.isEmpty || username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Semua kolom wajib diisi!'), backgroundColor: Colors.red),
@@ -31,8 +28,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    // 2. Cek Format Email (Harus mengandung @ dan .)
-    // Regex sederhana untuk email
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -41,15 +36,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    // ... validasi email dll ...
-
-    // 3. Simpan data ke memori HP
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_email', email);
     await prefs.setString('user_username', username);
     await prefs.setString('user_password', password);
     
-    // --- PERBAIKAN: Set status login ---
     await prefs.setBool('is_logged_in', true); 
 
     if (!mounted) return;
@@ -58,7 +49,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       const SnackBar(content: Text('Registrasi Berhasil! Silakan Login.'), backgroundColor: Colors.green),
     );
 
-    // Arahkan ke Login Screen
     Navigator.pushReplacement(
       context, 
       MaterialPageRoute(builder: (context) => const LoginScreen())
@@ -77,7 +67,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          // Input Email
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
@@ -87,7 +76,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          // Input Username
           TextFormField(
             controller: _usernameController,
             decoration: InputDecoration(
@@ -96,7 +84,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          // Input Password
           TextFormField(
             controller: _passwordController,
             obscureText: true,
@@ -129,7 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),
-                  onPressed: _handleRegister, // Panggil fungsi logika
+                  onPressed: _handleRegister,
                   child: const Text('Join', style: TextStyle(color: Colors.white)),
                 ),
               ),
